@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PreguntaRespuestaRepository extends JpaRepository<PreguntaRespuesta, Integer>{
     Optional<PreguntaRespuesta> findByPreguntaIgnoreCase(String pregunta);
+
+    public PreguntaRespuesta findByPregunta(String pregunta);
 }

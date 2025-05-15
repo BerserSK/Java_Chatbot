@@ -1,7 +1,9 @@
 package com.ChatBot.ChatBot.Service;
 
+import com.ChatBot.ChatBot.DTO.OpcionDTO;
 import com.ChatBot.ChatBot.Entity.PreguntaRespuesta;
-import com.ChatBot.ChatBot.Entity.RespuestaDTO;
+import com.ChatBot.ChatBot.DTO.RespuestaDTO;
+
 import com.ChatBot.ChatBot.Repository.PreguntaRespuestaRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,21 +25,24 @@ public class ChatbotService {
     }
 
     public RespuestaDTO responder(String pregunta) {
-        Optional<PreguntaRespuesta> encontrada = repository.findByPreguntaIgnoreCase(pregunta.trim());
+        PreguntaRespuesta encontrado = repository.findByPregunta(pregunta);
 
-        if (encontrada.isPresent()) {
-            PreguntaRespuesta entity = encontrada.get();
-            List<String> opcionesParsed = parsearOpciones(entity.getOpciones());
-
-            return new RespuestaDTO(
-                    entity.getId(),
-                    entity.getPregunta(),
-                    entity.getRespuesta(),
-                    opcionesParsed
-            );
-        } else {
-            return new RespuestaDTO(null, pregunta, "Lo siento, no tengo respuesta para eso.", Collections.emptyList());
+        if (encontrado == null) {
+            return new RespuestaDTO("Lo siento, no tengo una respuesta para eso.", null);
         }
+
+        List<OpcionDTO> opciones = null;
+        try {
+            if (encontrado.getOpciones() != null && !encontrado.getOpciones().isBlank()) {
+                ObjectMapper mapper = new ObjectMapper();
+                opciones = mapper.readValue(encontrado.getOpciones(), new TypeReference<List<OpcionDTO>>() {});
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // Puedes registrar el error con logger si prefieres
+        }
+
+        return new RespuestaDTO(encontrado.getRespuesta(), opciones);
+
     }
 
     private List<String> parsearOpciones(String opcionesJson) {
