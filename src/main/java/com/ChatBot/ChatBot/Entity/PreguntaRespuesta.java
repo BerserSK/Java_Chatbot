@@ -15,6 +15,8 @@ public class PreguntaRespuesta {
     @Column(unique = true)
     private String pregunta;
     private String respuesta;
+    
+    @Column(columnDefinition = "TEXT") // Importante si es JSON largo
     private String opciones; //JSON Opcional
 
     //Construtor vacio
